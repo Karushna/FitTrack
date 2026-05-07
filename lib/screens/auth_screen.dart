@@ -127,7 +127,7 @@ class _AuthScreenState extends State<AuthScreen> {
                   ),
                 ),
                 const Text(
-                  'Fitness tracking with Supabase backend',
+                  'Fitness tracking wherever you go',
                   textAlign: TextAlign.center,
                   style: TextStyle(color: Colors.white70, fontSize: 15),
                 ),
