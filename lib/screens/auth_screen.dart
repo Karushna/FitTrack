@@ -51,7 +51,11 @@ class _AuthScreenState extends State<AuthScreen> {
         MaterialPageRoute(builder: (_) => const MainNavigationScreen()),
       );
     } catch (e) {
-      showMessage(e.toString().replaceAll('Exception: ', ''));
+      showMessage(
+      e.toString()
+          .replaceAll('AuthException(message: ', '')
+          .replaceAll(')', ''),
+      );
     } finally {
       if (mounted) setState(() => isLoading = false);
     }

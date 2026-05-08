@@ -37,13 +37,17 @@ class DatabaseService {
   }
 
   static Future<void> signIn({
-    required String email,
-    required String password,
+  required String email,
+  required String password,
   }) async {
-    await client.auth.signInWithPassword(
+    final response = await client.auth.signInWithPassword(
       email: email,
       password: password,
     );
+
+    if (response.user == null) {
+      throw Exception('Invalid email or password');
+    }
   }
 
   static Future<void> signOut() async {
