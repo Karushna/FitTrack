@@ -1,11 +1,23 @@
-class SupabaseConfig {
-  // Replace these two values from your Supabase project.
-  //
-  // Supabase dashboard:
-  // Project Settings > API > Project URL
-  static const String supabaseUrl = 'https://lqdebadqlgbytseyfraq.supabase.co';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-  // Supabase dashboard:
-  // Project Settings > API > anon public key
-  static const String supabaseAnonKey = 'sb_publishable_OdA3coPKrPn96ZlNNPy9Lg_BHFQBuOI';
+class SupabaseConfig {
+  static String get supabaseUrl {
+    final url = dotenv.env['SUPABASE_URL'];
+
+    if (url == null || url.isEmpty) {
+      throw Exception('SUPABASE_URL missing in .env');
+    }
+
+    return url;
+  }
+
+  static String get supabaseAnonKey {
+    final key = dotenv.env['SUPABASE_ANON_KEY'];
+
+    if (key == null || key.isEmpty) {
+      throw Exception('SUPABASE_ANON_KEY missing in .env');
+    }
+
+    return key;
+  }
 }
