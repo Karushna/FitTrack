@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-
+import 'user_profile_screen.dart';
 import '../services/database_service.dart';
 
 class HomeFeedScreen extends StatelessWidget {
@@ -183,16 +183,32 @@ class HomeFeedScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     ListTile(
-                      leading: buildAvatar(activity),
-                      title: Text(
-                        activity['user_name'] ?? 'Athlete',
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => UserProfileScreen(
+                            userId: activity['user_id'],
+                          ),
                         ),
-                      ),
-                      subtitle: Text(activity['type'] ?? 'Activity'),
-                      trailing: const Icon(Icons.more_horiz),
+                      );
+                    },
+                    leading: CircleAvatar(
+                      backgroundColor: const Color(0xFFFF5A1F),
+                      backgroundImage: activity['avatar_url'] != null
+                          ? NetworkImage(activity['avatar_url'])
+                          : null,
+                      child: activity['avatar_url'] == null
+                          ? const Icon(Icons.person, color: Colors.white)
+                          : null,
                     ),
+                    title: Text(
+                      activity['user_name'] ?? 'Athlete',
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    subtitle: Text(activity['type'] ?? 'Activity'),
+                    trailing: const Icon(Icons.more_horiz),
+                  ),
                     buildActivityImage(activity),
                     Padding(
                       padding: const EdgeInsets.all(16),

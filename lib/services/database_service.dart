@@ -31,6 +31,7 @@ class DatabaseService {
       'id': user.id,
       'name': name,
       'email': email,
+      'location': '',
       'avatar_url': null,
     });
   }
@@ -58,23 +59,37 @@ class DatabaseService {
         .maybeSingle();
   }
 
+  static Future<Map<String, dynamic>?> getProfileById(String userId) async {
+    return await client
+        .from('profiles')
+        .select()
+        .eq('id', userId)
+        .maybeSingle();
+  }
+
+  static Future<void> updateLocation(String location) async {
+    await client.from('profiles').update({
+      'location': location,
+    }).eq('id', currentUserId);
+  }
+
   static Future<String> uploadProfileImage(File file) async {
-  final userId = currentUserId;
-  final filePath = '$userId/profile.jpg';
+    final userId = currentUserId;
+    final filePath = '$userId/profile.jpg';
 
-  await client.storage.from('avatars').upload(
-    filePath,
-    file,
-    fileOptions: const FileOptions(upsert: true),
-  );
+    await client.storage.from('avatars').upload(
+          filePath,
+          file,
+          fileOptions: const FileOptions(upsert: true),
+        );
 
-  final imageUrl = client.storage.from('avatars').getPublicUrl(filePath);
+    final imageUrl = client.storage.from('avatars').getPublicUrl(filePath);
 
-  await client.from('profiles').update({
-    'avatar_url': imageUrl,
-  }).eq('id', userId);
+    await client.from('profiles').update({
+      'avatar_url': imageUrl,
+    }).eq('id', userId);
 
-  return imageUrl;
+    return imageUrl;
   }
 
   static Future<void> removeProfileImage() async {
@@ -90,22 +105,30 @@ class DatabaseService {
 
   // ACTIVITIES
   static Future<void> addActivity({
-  required String type,
-  required double distanceKm,
-  required int minutes,
-  required String imageUrl,
+    required String type,
+    required double distanceKm,
+    required int minutes,
+    required String imageUrl,
   }) async {
-  final profile = await getCurrentProfile();
+    final profile = await getCurrentProfile();
 
-  await client.from('activities').insert({
-    'user_id': currentUserId,
-    'user_name': profile?['name'] ?? currentUserEmail,
-    'avatar_url': profile?['avatar_url'],
-    'type': type,
-    'distance_km': distanceKm,
-    'minutes': minutes,
-    'image_url': imageUrl,
-   });
+    await client.from('activities').insert({
+      'user_id': currentUserId,
+      'user_name': profile?['name'] ?? currentUserEmail,
+      'avatar_url': profile?['avatar_url'],
+      'type': type,
+      'distance_km': distanceKm,
+      'minutes': minutes,
+      'image_url': imageUrl,
+    });
+  }
+
+  static Future<List<dynamic>> getUserActivities(String userId) async {
+    return await client
+        .from('activities')
+        .select()
+        .eq('user_id', userId)
+        .order('created_at', ascending: false);
   }
 
   // ROUTES
@@ -157,5 +180,126 @@ class DatabaseService {
         .maybeSingle();
 
     return row != null;
+  }
+
+  static Future<List<dynamic>> getJoinedChallenges() async {
+    return await client
+        .from('challenge_members')
+        .select('*, challenges(*)')
+        .eq('user_id', currentUserId)
+        .order('created_at', ascending: false);
+  }
+
+  // FOLLOW SYSTEM
+  static Future<int> getFollowersCount(String userId) async {
+    final rows = await client
+        .from('follows')
+        .select()
+        .eq('following_id', userId);
+
+    return rows.length;
+  }
+
+  static Future<int> getFollowingCount(String userId) async {
+    final rows = await client
+        .from('follows')
+        .select()
+        .eq('follower_id', userId);
+
+    return rows.length;
+  }
+
+  static Future<bool> isFollowing(String userId) async {
+    final row = await client
+        .from('follows')
+        .select()
+        .eq('follower_id', currentUserId)
+        .eq('following_id', userId)
+        .maybeSingle();
+
+    return row != null;
+  }
+
+  static Future<void> followUser(String userId) async {
+    if (userId == currentUserId) return;
+
+    await client.from('follows').upsert({
+      'follower_id': currentUserId,
+      'following_id': userId,
+    });
+  }
+
+  static Future<void> unfollowUser(String userId) async {
+    await client
+        .from('follows')
+        .delete()
+        .eq('follower_id', currentUserId)
+        .eq('following_id', userId);
+  }
+
+  // KUDOS
+  static Future<void> toggleKudos(int activityId) async {
+    final existing = await client
+        .from('kudos')
+        .select()
+        .eq('activity_id', activityId)
+        .eq('user_id', currentUserId)
+        .maybeSingle();
+
+    if (existing == null) {
+      await client.from('kudos').insert({
+        'activity_id': activityId,
+        'user_id': currentUserId,
+      });
+    } else {
+      await client
+          .from('kudos')
+          .delete()
+          .eq('activity_id', activityId)
+          .eq('user_id', currentUserId);
+    }
+  }
+
+  static Future<bool> hasGivenKudos(int activityId) async {
+    final row = await client
+        .from('kudos')
+        .select()
+        .eq('activity_id', activityId)
+        .eq('user_id', currentUserId)
+        .maybeSingle();
+
+    return row != null;
+  }
+
+  static Future<int> getKudosCount(int activityId) async {
+    final rows = await client
+        .from('kudos')
+        .select()
+        .eq('activity_id', activityId);
+
+    return rows.length;
+  }
+
+  // COMMENTS
+  static Future<void> addComment({
+    required int activityId,
+    required String comment,
+  }) async {
+    final profile = await getCurrentProfile();
+
+    await client.from('comments').insert({
+      'activity_id': activityId,
+      'user_id': currentUserId,
+      'user_name': profile?['name'] ?? currentUserEmail,
+      'comment': comment,
+    });
+  }
+
+  static Future<List<dynamic>> getComments(int activityId) async {
+    return await client
+        .from('comments')
+        .select()
+        .eq('activity_id', activityId)
+        .order('created_at', ascending: false);
   }
 }

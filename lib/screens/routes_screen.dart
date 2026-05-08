@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'route_detail_screen.dart';
 
 import '../services/database_service.dart';
 
@@ -78,11 +79,22 @@ class RoutesScreen extends StatelessWidget {
                   children: [
                     Image.network(route['image_url'], height: 150, width: double.infinity, fit: BoxFit.cover),
                     ListTile(
-                      title: Text(route['name'] ?? 'Route', style: const TextStyle(fontWeight: FontWeight.bold)),
-                      subtitle: Text('${route['location']} • ${distance.toStringAsFixed(1)} km • ${route['difficulty']}'),
-                      leading: const CircleAvatar(backgroundColor: Color(0xFFFFE4D8), child: Icon(Icons.route, color: Color(0xFFFF5A1F))),
-                      trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => RouteDetailScreen(route: route),
                     ),
+                  );
+                },
+                title: Text(route['name'] ?? 'Route', style: const TextStyle(fontWeight: FontWeight.bold)),
+                subtitle: Text('${route['location']} • ${distance.toStringAsFixed(1)} km • ${route['difficulty']}'),
+                leading: const CircleAvatar(
+                  backgroundColor: Color(0xFFFFE4D8),
+                  child: Icon(Icons.route, color: Color(0xFFFF5A1F)),
+                ),
+                trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+              ),
                   ],
                 ),
               );

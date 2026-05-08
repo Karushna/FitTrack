@@ -134,7 +134,7 @@ class _RecordActivityScreenState extends State<RecordActivityScreen> {
           ElevatedButton.icon(
             onPressed: isSaving ? null : saveActivity,
             icon: const Icon(Icons.save),
-            label: Text(isSaving ? 'Saving...' : 'Save to Supabase'),
+            label: Text(isSaving ? 'Saving...' : 'Save Activity'),
           ),
         ],
       ),
