@@ -1,5 +1,5 @@
-name: fittrack_app
-description: A Flutter fitness tracking app with Supabase backend.
+name: fittrack
+description: A Flutter fitness tracking app.
 publish_to: 'none'
 
 version: 1.0.0+1

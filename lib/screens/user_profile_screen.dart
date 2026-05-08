@@ -35,15 +35,19 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   }
 
   Future<void> loadUserProfile() async {
-    setState(() => isLoading = true);
-
     try {
+      setState(() => isLoading = true);
+
       final userProfile = await DatabaseService.getProfileById(widget.userId);
-      final userActivities = await DatabaseService.getUserActivities(widget.userId);
-      final followers = await DatabaseService.getFollowersCount(widget.userId);
-      final following = await DatabaseService.getFollowingCount(widget.userId);
+      final userActivities =
+          await DatabaseService.getUserActivities(widget.userId);
+      final followers =
+          await DatabaseService.getFollowersCount(widget.userId);
+      final following =
+          await DatabaseService.getFollowingCount(widget.userId);
 
       bool followingStatus = false;
+
       if (!isMyProfile) {
         followingStatus = await DatabaseService.isFollowing(widget.userId);
       }
@@ -78,9 +82,9 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   Future<void> toggleFollow() async {
     if (isMyProfile || isUpdatingFollow) return;
 
-    setState(() => isUpdatingFollow = true);
-
     try {
+      setState(() => isUpdatingFollow = true);
+
       if (isFollowing) {
         await DatabaseService.unfollowUser(widget.userId);
       } else {
@@ -95,8 +99,27 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
         SnackBar(content: Text(e.toString())),
       );
     } finally {
-      if (mounted) setState(() => isUpdatingFollow = false);
+      if (mounted) {
+        setState(() => isUpdatingFollow = false);
+      }
     }
+  }
+
+  Widget buildAvatar(String? avatarUrl) {
+    return CircleAvatar(
+      radius: 52,
+      backgroundColor: Colors.white,
+      backgroundImage: avatarUrl != null && avatarUrl.isNotEmpty
+          ? NetworkImage(avatarUrl)
+          : null,
+      child: avatarUrl == null || avatarUrl.isEmpty
+          ? const Icon(
+              Icons.person,
+              size: 54,
+              color: Color(0xFFFF5A1F),
+            )
+          : null,
+    );
   }
 
   @override
@@ -109,14 +132,22 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
 
     if (profile == null) {
       return Scaffold(
-        appBar: AppBar(title: const Text('User Profile')),
-        body: const Center(child: Text('User profile not found')),
+        appBar: AppBar(
+          title: const Text('User Profile'),
+          backgroundColor: Colors.white,
+          foregroundColor: Colors.black,
+          elevation: 0,
+        ),
+        body: const Center(
+          child: Text('User profile not found'),
+        ),
       );
     }
 
-    final name = profile?['name'] ?? 'Athlete';
-    final location = profile?['location'] ?? '';
-    final avatarUrl = profile?['avatar_url'];
+    final name = profile?['name']?.toString() ?? 'Athlete';
+    final email = profile?['email']?.toString() ?? '';
+    final location = profile?['location']?.toString() ?? '';
+    final avatarUrl = profile?['avatar_url']?.toString();
 
     return Scaffold(
       appBar: AppBar(
@@ -134,32 +165,33 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
               padding: const EdgeInsets.all(22),
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
-                  colors: [Color(0xFFFF5A1F), Color(0xFFFF9D2E)],
+                  colors: [
+                    Color(0xFFFF5A1F),
+                    Color(0xFFFF9D2E),
+                  ],
                 ),
                 borderRadius: BorderRadius.circular(26),
               ),
               child: Column(
                 children: [
-                  CircleAvatar(
-                    radius: 52,
-                    backgroundColor: Colors.white,
-                    backgroundImage: avatarUrl != null && avatarUrl.toString().isNotEmpty
-                        ? NetworkImage(avatarUrl)
-                        : null,
-                    child: avatarUrl == null || avatarUrl.toString().isEmpty
-                        ? const Icon(Icons.person, size: 54, color: Color(0xFFFF5A1F))
-                        : null,
-                  ),
+                  buildAvatar(avatarUrl),
                   const SizedBox(height: 12),
                   Text(
                     name,
+                    textAlign: TextAlign.center,
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 23,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  if (location.toString().isNotEmpty)
+                  const SizedBox(height: 4),
+                  if (email.isNotEmpty)
+                    Text(
+                      email,
+                      style: const TextStyle(color: Colors.white70),
+                    ),
+                  if (location.isNotEmpty)
                     Text(
                       location,
                       style: const TextStyle(color: Colors.white70),
@@ -168,7 +200,9 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                   if (!isMyProfile)
                     ElevatedButton.icon(
                       onPressed: isUpdatingFollow ? null : toggleFollow,
-                      icon: Icon(isFollowing ? Icons.check : Icons.person_add),
+                      icon: Icon(
+                        isFollowing ? Icons.check : Icons.person_add,
+                      ),
                       label: Text(
                         isUpdatingFollow
                             ? 'Updating...'
@@ -181,15 +215,22 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                         foregroundColor: const Color(0xFFFF5A1F),
                       ),
                     ),
+                  if (isMyProfile)
+                    const Text(
+                      'This is your profile',
+                      style: TextStyle(color: Colors.white),
+                    ),
                 ],
               ),
             ),
             const SizedBox(height: 24),
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 UserStat(title: 'Activities', value: '${activities.length}'),
-                UserStat(title: 'Distance', value: '${totalDistance.toStringAsFixed(1)} km'),
+                UserStat(
+                  title: 'Distance',
+                  value: '${totalDistance.toStringAsFixed(1)} km',
+                ),
                 UserStat(title: 'Followers', value: '$followersCount'),
                 UserStat(title: 'Following', value: '$followingCount'),
               ],
@@ -220,11 +261,13 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                 child: ListTile(
                   leading: const CircleAvatar(
                     backgroundColor: Color(0xFFFFE4D8),
-                    child: Icon(Icons.directions_run, color: Color(0xFFFF5A1F)),
+                    child: Icon(
+                      Icons.directions_run,
+                      color: Color(0xFFFF5A1F),
+                    ),
                   ),
                   title: Text('$type - ${distance.toStringAsFixed(1)} km'),
                   subtitle: Text('$minutes min'),
-                  trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                 ),
               );
             }),
@@ -253,7 +296,7 @@ class UserStat extends StatelessWidget {
           borderRadius: BorderRadius.circular(18),
         ),
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
+          padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 6),
           child: Column(
             children: [
               Text(
@@ -261,14 +304,17 @@ class UserStat extends StatelessWidget {
                 textAlign: TextAlign.center,
                 style: const TextStyle(
                   fontWeight: FontWeight.bold,
-                  fontSize: 15,
+                  fontSize: 14,
                 ),
               ),
               const SizedBox(height: 3),
               Text(
                 title,
                 textAlign: TextAlign.center,
-                style: const TextStyle(color: Colors.grey, fontSize: 12),
+                style: const TextStyle(
+                  color: Colors.grey,
+                  fontSize: 11,
+                ),
               ),
             ],
           ),
