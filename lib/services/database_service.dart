@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class DatabaseService {
@@ -8,6 +10,7 @@ class DatabaseService {
   static String get currentUserId => client.auth.currentUser!.id;
   static String get currentUserEmail => client.auth.currentUser!.email ?? '';
 
+  // AUTH
   static Future<void> signUp({
     required String name,
     required String email,
@@ -19,6 +22,7 @@ class DatabaseService {
     );
 
     final user = response.user;
+
     if (user == null) {
       throw Exception('Signup failed. Please check Supabase email settings.');
     }
@@ -27,7 +31,7 @@ class DatabaseService {
       'id': user.id,
       'name': name,
       'email': email,
-      'location': 'Colombo, Sri Lanka',
+      'avatar_url': null,
     });
   }
 
@@ -45,6 +49,7 @@ class DatabaseService {
     await client.auth.signOut();
   }
 
+  // PROFILE
   static Future<Map<String, dynamic>?> getCurrentProfile() async {
     return await client
         .from('profiles')
@@ -53,24 +58,57 @@ class DatabaseService {
         .maybeSingle();
   }
 
-  static Future<void> addActivity({
-    required String type,
-    required double distanceKm,
-    required int minutes,
-    required String imageUrl,
-  }) async {
-    final profile = await getCurrentProfile();
+  static Future<String> uploadProfileImage(File file) async {
+  final userId = currentUserId;
+  final filePath = '$userId/profile.jpg';
 
-    await client.from('activities').insert({
-      'user_id': currentUserId,
-      'user_name': profile?['name'] ?? currentUserEmail,
-      'type': type,
-      'distance_km': distanceKm,
-      'minutes': minutes,
-      'image_url': imageUrl,
-    });
+  await client.storage.from('avatars').upload(
+    filePath,
+    file,
+    fileOptions: const FileOptions(upsert: true),
+  );
+
+  final imageUrl = client.storage.from('avatars').getPublicUrl(filePath);
+
+  await client.from('profiles').update({
+    'avatar_url': imageUrl,
+  }).eq('id', userId);
+
+  return imageUrl;
   }
 
+  static Future<void> removeProfileImage() async {
+    final userId = currentUserId;
+    final filePath = '$userId/profile.jpg';
+
+    await client.storage.from('avatars').remove([filePath]);
+
+    await client.from('profiles').update({
+      'avatar_url': null,
+    }).eq('id', userId);
+  }
+
+  // ACTIVITIES
+  static Future<void> addActivity({
+  required String type,
+  required double distanceKm,
+  required int minutes,
+  required String imageUrl,
+  }) async {
+  final profile = await getCurrentProfile();
+
+  await client.from('activities').insert({
+    'user_id': currentUserId,
+    'user_name': profile?['name'] ?? currentUserEmail,
+    'avatar_url': profile?['avatar_url'],
+    'type': type,
+    'distance_km': distanceKm,
+    'minutes': minutes,
+    'image_url': imageUrl,
+   });
+  }
+
+  // ROUTES
   static Future<void> addRoute({
     required String name,
     required String location,
@@ -88,6 +126,7 @@ class DatabaseService {
     });
   }
 
+  // CHALLENGES
   static Future<void> addChallenge({
     required String title,
     required double targetKm,

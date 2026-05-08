@@ -16,29 +16,104 @@ class HomeFeedScreen extends StatelessWidget {
       isScrollControlled: true,
       builder: (_) {
         return Padding(
-          padding: EdgeInsets.fromLTRB(18, 18, 18, MediaQuery.of(context).viewInsets.bottom + 18),
+          padding: EdgeInsets.fromLTRB(
+            18,
+            18,
+            18,
+            MediaQuery.of(context).viewInsets.bottom + 18,
+          ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text('Add Feed Activity', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+              const Text(
+                'Add Feed Activity',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
               const SizedBox(height: 14),
-              TextField(controller: typeController, decoration: const InputDecoration(labelText: 'Activity type')),
-              TextField(controller: distanceController, decoration: const InputDecoration(labelText: 'Distance km'), keyboardType: TextInputType.number),
-              TextField(controller: minutesController, decoration: const InputDecoration(labelText: 'Time minutes'), keyboardType: TextInputType.number),
+              TextField(
+                controller: typeController,
+                decoration: const InputDecoration(labelText: 'Activity type'),
+              ),
+              TextField(
+                controller: distanceController,
+                decoration: const InputDecoration(labelText: 'Distance km'),
+                keyboardType: TextInputType.number,
+              ),
+              TextField(
+                controller: minutesController,
+                decoration: const InputDecoration(labelText: 'Time minutes'),
+                keyboardType: TextInputType.number,
+              ),
               const SizedBox(height: 16),
               ElevatedButton(
                 onPressed: () async {
                   await DatabaseService.addActivity(
-                    type: typeController.text.trim().isEmpty ? 'New Activity' : typeController.text.trim(),
+                    type: typeController.text.trim().isEmpty
+                        ? 'New Activity'
+                        : typeController.text.trim(),
                     distanceKm: double.tryParse(distanceController.text) ?? 0,
                     minutes: int.tryParse(minutesController.text) ?? 0,
-                    imageUrl: 'https://images.unsplash.com/photo-1476480862126-209bfaa8edc8?w=900',
+                    imageUrl:
+                        'https://images.unsplash.com/photo-1476480862126-209bfaa8edc8?w=900',
                   );
-                  if (context.mounted) Navigator.pop(context);
+
+                  if (context.mounted) {
+                    Navigator.pop(context);
+                  }
                 },
                 child: const Text('Add Activity'),
               ),
             ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget buildAvatar(Map<String, dynamic> activity) {
+    final avatarUrl = activity['avatar_url']?.toString();
+
+    return CircleAvatar(
+      backgroundColor: const Color(0xFFFF5A1F),
+      backgroundImage: avatarUrl != null && avatarUrl.isNotEmpty
+          ? NetworkImage(avatarUrl)
+          : null,
+      child: avatarUrl == null || avatarUrl.isEmpty
+          ? const Icon(Icons.person, color: Colors.white)
+          : null,
+    );
+  }
+
+  Widget buildActivityImage(Map<String, dynamic> activity) {
+    final imageUrl = activity['image_url']?.toString();
+
+    if (imageUrl == null || imageUrl.isEmpty) {
+      return Container(
+        height: 165,
+        width: double.infinity,
+        color: const Color(0xFFFFE4D8),
+        child: const Icon(
+          Icons.image_not_supported,
+          size: 42,
+          color: Color(0xFFFF5A1F),
+        ),
+      );
+    }
+
+    return Image.network(
+      imageUrl,
+      height: 165,
+      width: double.infinity,
+      fit: BoxFit.cover,
+      errorBuilder: (context, error, stackTrace) {
+        return Container(
+          height: 165,
+          width: double.infinity,
+          color: const Color(0xFFFFE4D8),
+          child: const Icon(
+            Icons.broken_image,
+            size: 42,
+            color: Color(0xFFFF5A1F),
           ),
         );
       },
@@ -54,11 +129,17 @@ class HomeFeedScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('FitTrack', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: const Text(
+          'FitTrack',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
         elevation: 0,
-        actions: const [Icon(Icons.notifications_outlined), SizedBox(width: 16)],
+        actions: const [
+          Icon(Icons.notifications_outlined),
+          SizedBox(width: 16),
+        ],
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => openAddActivitySheet(context),
@@ -67,35 +148,52 @@ class HomeFeedScreen extends StatelessWidget {
       body: StreamBuilder<List<Map<String, dynamic>>>(
         stream: stream,
         builder: (context, snapshot) {
-          if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
+          if (!snapshot.hasData) {
+            return const Center(child: CircularProgressIndicator());
+          }
 
           final activities = snapshot.data!;
-          if (activities.isEmpty) return const Center(child: Text('No feed activities yet. Add one.'));
+
+          if (activities.isEmpty) {
+            return const Center(
+              child: Text('No feed activities yet. Add one.'),
+            );
+          }
 
           return ListView.builder(
             padding: const EdgeInsets.all(16),
             itemCount: activities.length,
             itemBuilder: (context, index) {
               final activity = activities[index];
+
               final distance = (activity['distance_km'] ?? 0).toDouble();
               final minutes = activity['minutes'] ?? 0;
-              final pace = distance <= 0 ? '-- /km' : '${(minutes / distance).toStringAsFixed(1)} /km';
+              final pace = distance <= 0
+                  ? '-- /km'
+                  : '${(minutes / distance).toStringAsFixed(1)} /km';
 
               return Card(
                 margin: const EdgeInsets.only(bottom: 18),
                 clipBehavior: Clip.antiAlias,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(22),
+                ),
                 elevation: 4,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     ListTile(
-                      leading: const CircleAvatar(backgroundColor: Color(0xFFFF5A1F), child: Icon(Icons.person, color: Colors.white)),
-                      title: Text(activity['user_name'] ?? 'Athlete', style: const TextStyle(fontWeight: FontWeight.bold)),
+                      leading: buildAvatar(activity),
+                      title: Text(
+                        activity['user_name'] ?? 'Athlete',
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                       subtitle: Text(activity['type'] ?? 'Activity'),
                       trailing: const Icon(Icons.more_horiz),
                     ),
-                    Image.network(activity['image_url'], height: 165, width: double.infinity, fit: BoxFit.cover),
+                    buildActivityImage(activity),
                     Padding(
                       padding: const EdgeInsets.all(16),
                       child: Row(
@@ -135,9 +233,18 @@ class HomeFeedScreen extends StatelessWidget {
   Widget stat(String label, String value) {
     return Column(
       children: [
-        Text(value, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 17)),
+        Text(
+          value,
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 17,
+          ),
+        ),
         const SizedBox(height: 3),
-        Text(label, style: const TextStyle(color: Colors.grey)),
+        Text(
+          label,
+          style: const TextStyle(color: Colors.grey),
+        ),
       ],
     );
   }
