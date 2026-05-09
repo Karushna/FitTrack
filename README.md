@@ -1,136 +1,107 @@
-# FitTrack Flutter App with Supabase Backend
+# FitTrack 🏃‍♂️🔥
 
-This ZIP contains a complete Flutter app using Supabase as the backend.
+FitTrack is a social fitness tracking platform built using Flutter and Supabase. The application combines fitness tracking with community engagement, allowing users to record activities, follow athletes, give kudos, comment on performances, join fitness challenges, and explore routes.
 
-## What the app includes
+## 🎥 Demo Video
+https://youtube.com/shorts/OL0PyNwCpqo?feature=share
 
-- Real signup
-- Real signin
-- Logout
-- Profile page showing the signed-in user's name
-- Feed activities stored in Supabase
-- Routes stored in Supabase
-- Challenges stored in Supabase
-- Join challenge feature
-- Record activity timer
-- Save recorded timer activity to Supabase
 
-## What you need to change
+# ✨ Features
 
-### 1. Replace Supabase URL and anon key
+- User Authentication
+- Social Fitness Feed
+- Kudos & Comments System
+- Public User Profiles
+- Follow & Followers System
+- Fitness Challenges
+- Route Discovery
+- Activity Recording
+- Profile Customization
+- Real-time Backend Integration
 
-Open this file:
 
-```text
-lib/services/supabase_config.dart
-```
+# 🚀 Tech Stack
 
-Replace:
+- Flutter
+- Dart
+- Supabase
+- PostgreSQL
+- Supabase Authentication
+- Supabase Realtime
+- Supabase Storage
+- GitHub
 
-```dart
-static const String supabaseUrl = 'PASTE_YOUR_SUPABASE_PROJECT_URL_HERE';
-static const String supabaseAnonKey = 'PASTE_YOUR_SUPABASE_ANON_KEY_HERE';
-```
 
-With your own Supabase project values.
+# 🎯 Problem It Solves
 
-Find them in Supabase:
+Many people struggle to stay consistent with fitness because they lack motivation, accountability, and community support.
 
-```text
-Project Settings > API > Project URL
-Project Settings > API > anon public key
-```
+FitTrack solves this problem by transforming fitness into a social experience where users can motivate each other through shared activities, follows, comments, kudos, and fitness challenges.
 
-## Supabase setup
 
-### 2. Enable email authentication
+# 🛠️ How It Was Built
 
-In Supabase dashboard:
+FitTrack was developed as a solo project using Flutter for frontend development and Supabase for backend infrastructure, authentication, database management, and real-time functionality.
 
-```text
-Authentication > Providers > Email
-```
+The app includes:
+- Real-time social interactions
+- Secure authentication system
+- Cloud database integration
+- User-generated content management
+- Responsive mobile-first UI design
 
-Enable Email provider.
 
-Important for easy testing:
+# ⚡ Getting Started
 
-```text
-Authentication > Providers > Email > Confirm email
-```
-
-Turn **Confirm email OFF** while testing, otherwise new users may need to confirm email before logging in.
-
-### 3. Create database tables
-
-Open:
-
-```text
-supabase_setup.sql
-```
-
-Copy everything and run it in:
-
-```text
-Supabase Dashboard > SQL Editor > New query > Run
-```
-
-This creates:
-
-```text
-profiles
-activities
-routes
-challenges
-challenge_members
-```
-
-It also adds Row Level Security policies.
-
-## Flutter setup
-
-### 4. Create a new Flutter project
+## Clone Repository
 
 ```bash
-flutter create fittrack_app
-cd fittrack_app
+git clone https://github.com/Karushna/FitTrack.git
+cd FitTrack
 ```
 
-### 5. Copy files
-
-Copy the ZIP contents into your project.
-
-You can replace:
-
-```text
-lib/
-pubspec.yaml
-```
-
-with the files from this ZIP.
-
-### 6. Install packages
+## Install Dependencies
 
 ```bash
 flutter pub get
 ```
 
-### 7. Run
+---
+
+# 🔑 Environment Variables
+
+Create a `.env` file in the root directory:
+
+```env
+SUPABASE_URL=your_supabase_url
+SUPABASE_ANON_KEY=your_supabase_anon_key
+```
+
+# ▶️ Run Application
 
 ```bash
 flutter run
 ```
 
-## Notes
 
-The app uses online Unsplash image URLs, so your emulator or phone needs internet access.
+# 🌐 Build Web Version
 
-This is a real backend app, but it does not yet include:
+```bash
+flutter build web --release
+```
 
-- Real GPS location tracking
-- Real map route drawing
-- Image upload
-- Likes/comments database
-- Password reset
 
-Those can be added later.
+# 🔮 Future Improvements
+
+- GPS Route Tracking
+- Live Maps Integration
+- Push Notifications
+- Fitness Leaderboards
+- Achievement Badges
+- AI-powered Fitness Recommendations
+- Wearable Device Integration
+- Advanced Analytics
+
+# 📄 License
+
+This project is licensed under the MIT License.
