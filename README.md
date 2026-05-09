@@ -101,7 +101,3 @@ flutter build web --release
 - AI-powered Fitness Recommendations
 - Wearable Device Integration
 - Advanced Analytics
-
-# 📄 License
-
-This project is licensed under the MIT License.
